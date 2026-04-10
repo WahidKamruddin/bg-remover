@@ -1,4 +1,4 @@
-from rembg import remove
+from rembg import remove, new_session
 from PIL import Image, UnidentifiedImageError
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
@@ -37,6 +37,9 @@ limiter = Limiter(get_remote_address, app=app)
 # --- Constants ---
 ALLOWED_IMAGE_TYPES = {"jpeg", "png", "webp", "bmp"}
 
+# Load model once at startup instead of on every request
+rembg_session = new_session("u2netp")
+
 # --- API key auth ---
 # Set API_KEY env var to enable. Unset = no auth (convenient for local dev).
 API_KEY = os.getenv("API_KEY")
@@ -70,11 +73,13 @@ def handle_remove_background():
     except UnidentifiedImageError:
         return jsonify({"error": "Invalid or corrupt image"}), 400
 
-    result_image = remove(input_image)
+    result_image = remove(input_image, session=rembg_session)
 
     img_io = io.BytesIO()
     result_image.save(img_io, "PNG")
     img_io.seek(0)
+
+    print('image sent')
 
     return send_file(img_io, mimetype="image/png")
 
