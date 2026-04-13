@@ -30,8 +30,9 @@ limiter = Limiter(get_remote_address, app=app)
 # --- Constants ---
 ALLOWED_IMAGE_TYPES = {"jpeg", "png", "webp", "bmp"}
 
-# Load model once at startup instead of on every request
-rembg_session = new_session()
+# Load model once at startup instead of on every request.
+# u2netp is ~4.7MB vs u2net's 176MB — fits within Render's 512MB limit.
+rembg_session = new_session("u2netp")
 
 # --- API key auth ---
 # Set API_KEY env var to enable. Unset = no auth (convenient for local dev).
