@@ -15,18 +15,9 @@ load_dotenv()
 app = Flask(__name__)
 
 # --- CORS ---
-# Allows common localhost dev ports + an optional production origin via env var.
-# When ready for production, set ALLOWED_ORIGIN=https://yoursite.com
-allowed_origins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:8080",
-    "http://localhost:4200",
-]
-if os.getenv("ALLOWED_ORIGIN"):
-    allowed_origins.append(os.getenv("ALLOWED_ORIGIN"))
 
-CORS(app, origins=allowed_origins)
+CORS(app, origins=[os.getenv("ALLOWED_ORIGIN")])
+
 
 # --- File size limit: 10MB ---
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
@@ -38,7 +29,7 @@ limiter = Limiter(get_remote_address, app=app)
 ALLOWED_IMAGE_TYPES = {"jpeg", "png", "webp", "bmp"}
 
 # Load model once at startup instead of on every request
-rembg_session = new_session("u2netp")
+rembg_session = new_session()
 
 # --- API key auth ---
 # Set API_KEY env var to enable. Unset = no auth (convenient for local dev).
