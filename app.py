@@ -15,6 +15,8 @@ load_dotenv()
 app = Flask(__name__)
 
 # --- CORS ---
+if not os.getenv("ALLOWED_ORIGIN"):
+    raise RuntimeError("ALLOWED_ORIGIN env var must be set")
 
 CORS(app, origins=[os.getenv("ALLOWED_ORIGIN")])
 
@@ -70,9 +72,12 @@ def handle_remove_background():
     result_image.save(img_io, "PNG")
     img_io.seek(0)
 
-    print('image sent')
-
     return send_file(img_io, mimetype="image/png")
+
+
+@app.errorhandler(413)
+def too_large(e):
+    return jsonify({"error": "File exceeds 10MB limit"}), 413
 
 
 if __name__ == "__main__":
